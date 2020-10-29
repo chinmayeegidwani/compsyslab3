@@ -8,6 +8,11 @@
  * NOTE TO STUDENTS: Replace this header comment with your own header
  * comment that gives a high level description of your solution.
  */
+
+/* Segregated free list: size of lists?
+ * First fit for throughput vs best fit for utilization?
+ * Coalesce on free or deferred coalescing?
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -53,8 +58,8 @@ team_t team = {
 #define PUT(p,val)      (*(uintptr_t *)(p) = (val))
 
 /* Read the size and allocated fields from address p */
-#define GET_SIZE(p)     (GET(p) & ~(DSIZE - 1))
-#define GET_ALLOC(p)    (GET(p) & 0x1)
+#define GET_SIZE(p)     (GET(p) & ~(DSIZE - 1)) // size of payload from header
+#define GET_ALLOC(p)    (GET(p) & 0x1) // whether it's allocated or not
 
 /* Given block ptr bp, compute address of its header and footer */
 #define HDRP(bp)        ((char *)(bp) - WSIZE)
@@ -65,6 +70,19 @@ team_t team = {
 #define PREV_BLKP(bp) ((char *)(bp) - GET_SIZE(((char *)(bp) - DSIZE)))
 
 void* heap_listp = NULL;
+
+/* Specify size_t possible sizes for segregated free list */
+size_t free_list_sizes[14] = {32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144};
+
+
+/* Use doubly linked list for blocks */
+typedef struct linked_list{
+    struct linked_list* prev;
+    struct linked_list* next;
+} node;
+
+/* Contains array of pointers to the head of each seg. free list by size*/
+linked_list* free_lists[14];
 
 /**********************************************************
  * mm_init
@@ -269,6 +287,50 @@ void *mm_realloc(void *ptr, size_t size)
     mm_free(oldptr);
     return newptr;
 }
+
+/* Add block bp to the free list whose range matches
+ * Add to the head of the free list
+ * Return index in free_lists that the block was inserted into
+ */
+int* free_list_add(void *bp, size_t size){
+    /* find appropriate free list given size
+     * If free_lists[index] is null (ie no block of that size class has been
+     * added to list yet), add block and update lists and heads.
+     * If it is not null, add bp to head of the appropriatefree list.
+     */
+    size_t payload_size = GET_SIZE(HDRP(bp));
+    int index = 0;
+
+    /* create new node for free list */
+    node *new_free_block = (node*)bp;
+    new_free_block -> prev = NULL;
+    new_free_block -> next = NULL;
+
+    while(size < free_lists[index]){
+        index++;
+    }
+    if(free_lists[index] == NULL){
+        /* nothing in free_list[index], insert one new block */
+        free_lists[index] = new_free_block;
+    } else {
+        /* list not empty, insert new block at the head */
+        free_lists[index] -> prev = new_free_block;
+        new_free_block -> next = free_lists[index];
+        free_lists[index] = new_free_block;
+    }
+
+    return index;
+
+}
+
+/* Remove block bp from free list
+ * Update head of free list
+ */
+void* free_list_remove(void *bp, size_t size){
+
+
+}
+
 
 /**********************************************************
  * mm_check
