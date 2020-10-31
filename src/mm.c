@@ -183,12 +183,12 @@ void *extend_heap(size_t words)
  **********************************************************/
 void * find_fit(size_t asize)
 {
-    int index = get_index(asize);
+    //int index = get_index(asize);
     int block_size;
     int i=0;
     printf("in find_fit");
     while(i < 14){
-        node *current = free_lists[index];
+        node *current = free_lists[i];
         block_size = GET_SIZE(HDRP(current));
         if(asize <= block_size){
             // found block big enough
@@ -309,7 +309,9 @@ void *mm_realloc(void *ptr, size_t size)
 
 int get_index(int size){
     int index = 0;
-    while(size < GET_SIZE(HDRP(free_lists[index]))){
+    // in get index
+    while(size <= free_list_sizes[index]){
+        // in loop
         index++;
     }
     return index;
