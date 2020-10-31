@@ -186,6 +186,7 @@ void * find_fit(size_t asize)
     int index = get_index(asize);
     int block_size;
     int i=0;
+    printf("in find_fit");
     while(i < 14){
         node *current = free_lists[index];
         block_size = GET_SIZE(HDRP(current));
@@ -206,6 +207,7 @@ void * find_fit(size_t asize)
  **********************************************************/
 void place(void* bp, size_t asize)
 {
+    printf("in place \n");
   /* Get the current block size */
   size_t bsize = GET_SIZE(HDRP(bp));
 
@@ -222,6 +224,7 @@ void mm_free(void *bp)
     if(bp == NULL){
       return;
     }
+    printf("in mm_free");
     size_t size = GET_SIZE(HDRP(bp));
     PUT(HDRP(bp), PACK(size,0));
     PUT(FTRP(bp), PACK(size,0));
@@ -239,6 +242,7 @@ void mm_free(void *bp)
  **********************************************************/
 void *mm_malloc(size_t size)
 {
+    printf("starting program...\n");
     size_t asize; /* adjusted block size */
     size_t extendsize; /* amount to extend heap if no fit */
     char * bp;
@@ -252,9 +256,10 @@ void *mm_malloc(size_t size)
         asize = 2 * DSIZE;
     else
         asize = DSIZE * ((size + (DSIZE) + (DSIZE-1))/ DSIZE);
-
+    printf("in mm_malloc\n");
     /* Search the free list for a fit */
     if ((bp = find_fit(asize)) != NULL) {
+        printf("fit found, now placing\n");
         place(bp, asize);
         return bp;
     }
