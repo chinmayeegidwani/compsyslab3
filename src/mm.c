@@ -82,7 +82,7 @@ typedef struct linked_list{
 } node;
 
 /* Contains array of pointers to the head of each seg. free list by size*/
-linked_list* free_lists[14];
+node* free_lists[14];
 
 /**********************************************************
  * mm_init
@@ -171,20 +171,26 @@ void *extend_heap(size_t words)
 
 /**********************************************************
  * find_fit
- * Traverse the heap searching for a block to fit asize
+ * Traverse the free list searching for a block to fit asize
  * Return NULL if no free blocks can handle that size
  * Assumed that asize is aligned
  **********************************************************/
 void * find_fit(size_t asize)
 {
-    void *bp;
-    for (bp = heap_listp; GET_SIZE(HDRP(bp)) > 0; bp = NEXT_BLKP(bp))
-    {
-        if (!GET_ALLOC(HDRP(bp)) && (asize <= GET_SIZE(HDRP(bp))))
-        {
-            return bp;
+    int index = get_index(asize);
+    int block_size;
+    int i=0;
+    while(i < 14){
+        node *current = free_lists[index];
+        block_size = GET_SIZE(HDRP(current));
+        if(asize <= block_size){
+            // found block big enough
+            /* TODO: add splitting for blocks that can be split more */
+            free_list_remove(current);
+            return (void *) current; //cast back into void*
         }
     }
+
     return NULL;
 }
 
@@ -288,17 +294,27 @@ void *mm_realloc(void *ptr, size_t size)
     return newptr;
 }
 
+
+
+int get_index(int size){
+    int index = 0;
+    while(size < free_lists[index]){
+        index++;
+    }
+    return index;
+}
+
 /* Add block bp to the free list whose range matches
  * Add to the head of the free list
  * Return index in free_lists that the block was inserted into
  */
-int* free_list_add(void *bp, size_t size){
+int* free_list_add(void *bp){
     /* find appropriate free list given size
      * If free_lists[index] is null (ie no block of that size class has been
      * added to list yet), add block and update lists and heads.
      * If it is not null, add bp to head of the appropriatefree list.
      */
-    size_t payload_size = GET_SIZE(HDRP(bp));
+    size_t payload_size = GET_SIZE(HDRP(bp)); //includes header + footer (?)
     int index = 0;
 
     /* create new node for free list */
@@ -306,9 +322,8 @@ int* free_list_add(void *bp, size_t size){
     new_free_block -> prev = NULL;
     new_free_block -> next = NULL;
 
-    while(size < free_lists[index]){
-        index++;
-    }
+    index = get_index(payload_size);
+
     if(free_lists[index] == NULL){
         /* nothing in free_list[index], insert one new block */
         free_lists[index] = new_free_block;
@@ -323,11 +338,29 @@ int* free_list_add(void *bp, size_t size){
 
 }
 
-/* Remove block bp from free list
+/* Remove block bp from free list 
  * Update head of free list
  */
-void* free_list_remove(void *bp, size_t size){
+void free_list_remove(node* remove_block){
+    /* create remove node for free list */
+    //node *remove_block = (node*)bp;
+    int index = get_index(GET_SIZE(HDRP(remove_block)));
 
+    if(remove_block->prev == NULL && remove_block->next == NULL){
+        // There is only one block in the list
+        free_lists[index] = NULL;
+    } else if(free_lists[index] = remove_block){
+        // r_m is at the head of the list
+        free_lists[index] = remove_block->next;
+        free_lists[index]->prev = NULL;
+    } else if(remove_block->prev != NULL && remove_block -> next == NULL){
+        // block is the tail of the list
+        remove_block->prev->next = NULL;
+    } else{
+        // Not only block, so link up adjacent blocks
+        remove_block->next->prev = remove_block->prev;
+        remove_block->prev->next = remove_block->next;
+    }
 
 }
 
