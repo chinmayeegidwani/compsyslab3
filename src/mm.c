@@ -84,6 +84,12 @@ typedef struct linked_list{
 /* Contains array of pointers to the head of each seg. free list by size*/
 node* free_lists[14];
 
+
+/* Function declarations */
+int get_index(int size);
+void free_list_remove(node* remove_block);
+int* free_list_add(void *bp);
+
 /**********************************************************
  * mm_init
  * Initialize the heap, including "allocation" of the
@@ -219,7 +225,7 @@ void mm_free(void *bp)
     size_t size = GET_SIZE(HDRP(bp));
     PUT(HDRP(bp), PACK(size,0));
     PUT(FTRP(bp), PACK(size,0));
-    free_list_add((node *) coalesce(bp)); //cast to node and add to free list
+    free_list_add((void *) coalesce(bp)); //cast to node and add to free list
 }
 
 
@@ -298,7 +304,7 @@ void *mm_realloc(void *ptr, size_t size)
 
 int get_index(int size){
     int index = 0;
-    while(size < free_lists[index]){
+    while(size < GET_SIZE(HDRP(free_lists[index]))){
         index++;
     }
     return index;
