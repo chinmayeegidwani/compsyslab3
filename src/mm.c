@@ -193,7 +193,9 @@ void * find_fit(size_t asize)
     int i=0;
     printf("in find_fit");
     while(i < 14){
+        printf("while loop, iteration %d\n", i);
         node *current = free_lists[i];
+        if(current == NULL) { continue; }
         block_size = GET_SIZE(HDRP(current));
         if(asize <= block_size){
             // found block big enough
@@ -201,6 +203,7 @@ void * find_fit(size_t asize)
             free_list_remove(current);
             return (void *) current; //cast back into void*
         }
+        i++;
     }
 
     return NULL;
