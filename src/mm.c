@@ -187,14 +187,13 @@ void *extend_heap(size_t words)
  **********************************************************/
 void * find_fit(size_t asize)
 {
-    //int index = get_index(asize);
+    int i = get_index(asize);
     //debug print here
     int block_size;
-    int i=0;
     void* bp;
     printf("in find_fit");
     while(i < 14){
-        printf("while loop, iteration %d\n", i);
+        printf("while loop, index %d\n", i);
         node *current = free_lists[i];
         if(current != NULL){
             bp = (void*) current; //return pointer
