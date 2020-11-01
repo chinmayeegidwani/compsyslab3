@@ -105,6 +105,10 @@ int free_list_add(void *bp);
      PUT(heap_listp + (3 * WSIZE), PACK(0, 1));    // epilogue header
      heap_listp += DSIZE;
 
+     for(int i=0; i<14; i++){
+         free_lists[i] = NULL;
+     }
+
      return 0;
  }
 
@@ -184,6 +188,7 @@ void *extend_heap(size_t words)
 void * find_fit(size_t asize)
 {
     //int index = get_index(asize);
+    //debug print here
     int block_size;
     int i=0;
     printf("in find_fit");
@@ -256,6 +261,7 @@ void *mm_malloc(size_t size)
         asize = 2 * DSIZE;
     else
         asize = DSIZE * ((size + (DSIZE) + (DSIZE-1))/ DSIZE);
+    
     printf("in mm_malloc\n");
     /* Search the free list for a fit */
     if ((bp = find_fit(asize)) != NULL) {
