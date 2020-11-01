@@ -196,14 +196,14 @@ void * find_fit(size_t asize)
         printf("while loop, index %d\n", i);
         node *current = free_lists[i];
         if(current != NULL){
-            bp = (void*) current; //return pointer
+            //bp = (void*) current; //return pointer
             while(current != NULL){
                 bp = (void*) current;
                 // traverse each free list for block
                 if(asize <= GET_SIZE(HDRP(bp))){
                     // block fit found
                     printf("asize %d || ", asize);
-                    printf("bsize %d\n", GET_SIZE(HDRP(bp));
+                    printf("bsize %d\n", GET_SIZE(HDRP(bp)));
                     bp = (void*) current; //current might have changed, update bp
                     free_list_remove(current, i);
                     return bp;
@@ -357,6 +357,8 @@ void free_list_add(void *bp){
     new_free_block -> next = NULL;
 
     index = get_index(payload_size);
+    printf("payload size %d || ", payload_size);
+    printf("index %d\n", index);
 
     if(free_lists[index] == NULL){
         /* nothing in free_list[index], insert one new block */
