@@ -198,7 +198,8 @@ void * find_fit(size_t asize)
         node *current = free_lists[i];
         if(current != NULL){
             bp = (void*) current; //return pointer
-            while(bp != NULL){
+            while(current != NULL){
+                bp = (void*) current;
                 // traverse each free list for block
                 if(asize <= GET_SIZE(HDRP(bp))){
                     // block fit found
@@ -223,7 +224,7 @@ void * find_fit(size_t asize)
  **********************************************************/
 void place(void* bp, size_t asize)
 {
-    printf("in place \n");
+  //printf("in place \n");
   /* Get the current block size */
   size_t bsize = GET_SIZE(HDRP(bp));
 
