@@ -87,7 +87,7 @@ node* free_lists[14];
 
 /* Function declarations */
 int get_index(int size);
-void free_list_remove(node* remove_block);
+void free_list_remove(node* remove_block, int index);
 int free_list_add(void *bp);
 
 /**********************************************************
@@ -191,17 +191,25 @@ void * find_fit(size_t asize)
     //debug print here
     int block_size;
     int i=0;
+    void* bp;
     printf("in find_fit");
     while(i < 14){
         printf("while loop, iteration %d\n", i);
         node *current = free_lists[i];
-        if(current == NULL) { i++; continue; }
-        block_size = GET_SIZE(HDRP(current));
-        if(asize <= block_size){
-            // found block big enough
-            /* TODO: add splitting for blocks that can be split more */
-            free_list_remove(current);
-            return (void *) current; //cast back into void*
+        if(current != NULL){
+            bp = (void*) current; //return pointer
+            while(bp != NULL){
+                // traverse each free list for block
+                if(asize <= GET_SIZE(HDRP(bp))){
+                    // block fit found
+                    printf("asize %d || ", asize);
+                    printf("bsize %d\n", block_size);
+                    bp = (void*) current; //current might have changed, update bp
+                    free_list_remove(current, i);
+                    return bp;
+                }
+                current = current -> next;
+            }
         }
         i++;
     }
@@ -232,11 +240,12 @@ void mm_free(void *bp)
     if(bp == NULL){
       return;
     }
-    printf("in mm_free");
+    //printf("in mm_free");
     size_t size = GET_SIZE(HDRP(bp));
+    printf("Freeing size: %d\n", size);
     PUT(HDRP(bp), PACK(size,0));
     PUT(FTRP(bp), PACK(size,0));
-    free_list_add((void *) coalesce(bp)); //cast to node and add to free list
+    free_list_add(coalesce(bp)); //coalesce and add to free list
 }
 
 
@@ -250,7 +259,7 @@ void mm_free(void *bp)
  **********************************************************/
 void *mm_malloc(size_t size)
 {
-    printf("starting program...\n");
+    //printf("starting program...\n");
     size_t asize; /* adjusted block size */
     size_t extendsize; /* amount to extend heap if no fit */
     char * bp;
@@ -264,11 +273,11 @@ void *mm_malloc(size_t size)
         asize = 2 * DSIZE;
     else
         asize = DSIZE * ((size + (DSIZE) + (DSIZE-1))/ DSIZE);
-    
-    printf("in mm_malloc\n");
+    printf("The asize is: %d\n",asize);
+    //printf("in mm_malloc\n");
     /* Search the free list for a fit */
     if ((bp = find_fit(asize)) != NULL) {
-        printf("fit found, now placing\n");
+        //printf("fit found, now placing\n");
         place(bp, asize);
         return bp;
     }
@@ -318,11 +327,14 @@ void *mm_realloc(void *ptr, size_t size)
 
 int get_index(int size){
     int index = 0;
+    size_t seg_size = 32; //smallest block available, anything bigger will also use block size 32
     // in get index
-    while(size <= free_list_sizes[index]){
+    while(size >= seg_size && index < 15){
         // in loop
+        seg_size *= 2; // keep multiplying by two until big enough block size found
         index++;
     }
+    /* TODO: what happens if bigger block size than index 14 is requested?*/
     return index;
 }
 
@@ -363,10 +375,10 @@ int free_list_add(void *bp){
 /* Remove block bp from free list 
  * Update head of free list
  */
-void free_list_remove(node* remove_block){
+void free_list_remove(node* remove_block, int index){
     /* create remove node for free list */
     //node *remove_block = (node*)bp;
-    int index = get_index(GET_SIZE(HDRP(remove_block)));
+    //int index = get_index(GET_SIZE(HDRP(remove_block)));
 
     if(remove_block->prev == NULL && remove_block->next == NULL){
         // There is only one block in the list
