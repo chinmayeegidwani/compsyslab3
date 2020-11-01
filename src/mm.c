@@ -88,7 +88,7 @@ node* free_lists[14];
 /* Function declarations */
 int get_index(int size);
 void free_list_remove(node* remove_block, int index);
-int free_list_add(void *bp);
+void free_list_add(void *bp);
 
 /**********************************************************
  * mm_init
@@ -343,7 +343,7 @@ int get_index(int size){
  * Add to the head of the free list
  * Return index in free_lists that the block was inserted into
  */
-int free_list_add(void *bp){
+void free_list_add(void *bp){
     /* find appropriate free list given size
      * If free_lists[index] is null (ie no block of that size class has been
      * added to list yet), add block and update lists and heads.
@@ -369,7 +369,7 @@ int free_list_add(void *bp){
         free_lists[index] = new_free_block;
     }
 
-    return index;
+    //return index;
 
 }
 
@@ -396,6 +396,8 @@ void free_list_remove(node* remove_block, int index){
         remove_block->next->prev = remove_block->prev;
         remove_block->prev->next = remove_block->next;
     }
+    remove_block -> next = NULL;
+    remove_block -> prev = NULL;
 
 }
 
