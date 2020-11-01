@@ -204,7 +204,7 @@ void * find_fit(size_t asize)
                 if(asize <= GET_SIZE(HDRP(bp))){
                     // block fit found
                     printf("asize %d || ", asize);
-                    printf("bsize %d\n", block_size);
+                    printf("bsize %d\n", GET_SIZE(HDRP(bp));
                     bp = (void*) current; //current might have changed, update bp
                     free_list_remove(current, i);
                     return bp;
