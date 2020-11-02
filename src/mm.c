@@ -195,7 +195,7 @@ void * find_fit(size_t asize)
     while(i < 14){
         printf("while loop, index %d\n", i);
         node *current = free_lists[i];
-        if(current != NULL){
+        //if(current != NULL){
             //bp = (void*) current; //return pointer
             while(current != NULL){
                 bp = (void*) current;
@@ -210,7 +210,7 @@ void * find_fit(size_t asize)
                 }
                 current = current -> next;
             }
-        }
+        //}
         i++;
     }
 
@@ -329,7 +329,7 @@ int get_index(int size){
     int index = 0;
     size_t seg_size = 32; //smallest block available, anything bigger will also use block size 32
     // in get index
-    while(size >= seg_size && index < 15){
+    while(size > seg_size && index < 15){
         // in loop
         seg_size *= 2; // keep multiplying by two until big enough block size found
         index++;
