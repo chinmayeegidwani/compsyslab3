@@ -162,7 +162,7 @@ void *coalesce(void *bp)
         int next_index = get_index(GET_SIZE(HDRP(NEXT_BLKP(bp))));
         node* prev_block = (node*) PREV_BLKP(bp);
         node* next_block = (node*) NEXT_BLKP(bp);
-        free_list_remove(prev_block, prev_index);
+        free_list_remove(prev_block,prev_index);
         free_list_remove(next_block, next_index);
 
         PUT(HDRP(PREV_BLKP(bp)), PACK(size,0));
@@ -286,7 +286,10 @@ void mm_free(void *bp)
     printf("Freeing size: %d\n", size);
     PUT(HDRP(bp), PACK(size,0));
     PUT(FTRP(bp), PACK(size,0));
-    free_list_add(coalesce(bp)); //coalesce and add to free list
+    //bp = coalesce(bp);
+
+    free_list_add(bp); //coalesce and add to free list
+
 }
 
 
@@ -413,7 +416,7 @@ void free_list_add(void *bp){
     }
 
     //return index;
-
+    //mm_check();
 }
 
 /* Remove block bp from free list 
@@ -423,9 +426,11 @@ void free_list_remove(node* remove_block, int index){
     /* create remove node for free list */
     //node *remove_block = (node*)bp;
     //int index = get_index(GET_SIZE(HDRP(remove_block)));
-    mm_check();
-    printf("index in free: %d\n\n", index);
-    printf("remove block: %d\n\n", remove_block);
+
+    //printf("index: %d\n\n", index);
+    //printf("remove block: %d\n\n", remove_block);
+    //mm_check();
+
     if(remove_block->prev == NULL && remove_block->next == NULL){
         // There is only one block in the list
         free_lists[index] = NULL;
