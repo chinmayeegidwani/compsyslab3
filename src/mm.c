@@ -89,6 +89,7 @@ node* free_lists[14];
 int get_index(int size);
 void free_list_remove(node* remove_block, int index);
 void free_list_add(void *bp);
+int mm_check(void);
 
 /**********************************************************
  * mm_init
@@ -268,7 +269,10 @@ void mm_free(void *bp)
     printf("Freeing size: %d\n", size);
     PUT(HDRP(bp), PACK(size,0));
     PUT(FTRP(bp), PACK(size,0));
-    free_list_add(coalesce(bp)); //coalesce and add to free list
+    bp = coalesce(bp);
+    mm_check()
+    free_list_add(bp); //coalesce and add to free list
+    mm_check()
 }
 
 
@@ -302,6 +306,7 @@ void *mm_malloc(size_t size)
     if ((bp = find_fit(asize)) != NULL) {
         //printf("fit found, now placing\n");
         place(bp, asize);
+        mm_check();
         return bp;
     }
 
@@ -310,6 +315,7 @@ void *mm_malloc(size_t size)
     if ((bp = extend_heap(extendsize/WSIZE)) == NULL)
         return NULL;
     place(bp, asize);
+    mm_check();
     return bp;
 
 }
