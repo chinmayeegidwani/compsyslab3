@@ -283,7 +283,7 @@ void mm_free(void *bp)
     }
     //printf("in mm_free");
     size_t size = GET_SIZE(HDRP(bp));
-    printf("Freeing size: %d\n", size);
+    //printf("Freeing size: %d\n", size);
     PUT(HDRP(bp), PACK(size,0));
     PUT(FTRP(bp), PACK(size,0));
     //bp = coalesce(bp);
@@ -317,7 +317,7 @@ void *mm_malloc(size_t size)
         asize = 2 * DSIZE;
     else
         asize = DSIZE * ((size + (DSIZE) + (DSIZE-1))/ DSIZE);
-    printf("The asize is: %d\n",asize);
+    //printf("The asize is: %d\n",asize);
     //printf("in mm_malloc\n");
     /* Search the free list for a fit */
     if ((bp = find_fit(asize)) != NULL) {
@@ -393,7 +393,7 @@ void free_list_add(void *bp){
      * If it is not null, add bp to head of the appropriatefree list.
      */
     size_t payload_size = GET_SIZE(HDRP(bp)); //includes header + footer (?)
-    printf("payload: %d \n\n", payload_size);
+    //printf("payload: %d \n\n", payload_size);
     int index = 0;
 
     /* create new node for free list */
@@ -402,8 +402,8 @@ void free_list_add(void *bp){
     new_free_block -> next = NULL;
 
     index = get_index(payload_size);
-    printf("payload size %d || ", payload_size);
-    printf("index %d\n", index);
+    //printf("payload size %d || ", payload_size);
+    //printf("index %d\n", index);
 
     if(free_lists[index] == NULL){
         /* nothing in free_list[index], insert one new block */
