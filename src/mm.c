@@ -450,7 +450,7 @@ int mm_check(void){
 		
 		//check for any blocks that escape coalescing
 		if(curr_alloc == 0 && GET_ALLOC(HDRP(heap_start)) == 0){
-			printf("block escaped coalescing, but this could be fine if this was called before coalesce\n");
+			printf("block escaped coalescing!\n");
 		}
 		
 		//check for overlap between any blocks
@@ -466,7 +466,7 @@ int mm_check(void){
 	//and check to see if each block is free. 
 	for (int i = 0; i < 14; i++){
 		node* traverse = free_lists[i];
-		printf("hash value: %d\n",i);
+		printf("index value: %d\n",i);
 		while(traverse != NULL){
 			
 			int free_bit = GET_ALLOC(HDRP(traverse));
@@ -474,7 +474,7 @@ int mm_check(void){
 			printf("Address: 0x:%x tSize: %d Allocated: %d\n",traverse, GET_SIZE(HDRP(traverse)), free_bit);
 			
 			if(free_bit!=0){
-				printf("free bit isn't 0. This could be fine depending on where mm_check() is called.\n");
+				printf("free bit is NOT 0\n");
 			}
 			
 			traverse = traverse->next;
