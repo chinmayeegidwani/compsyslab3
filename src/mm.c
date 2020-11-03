@@ -187,6 +187,29 @@ void *extend_heap(size_t words)
  **********************************************************/
 void * find_fit(size_t asize)
 {
+    int index = get_index(asize);
+    while(index < 15){
+        node *bp = free_lists[index];
+        while(bp != NULL){
+            int bsize = GET_SIZE(HDRP(bp));
+            if(bsize >= asize){
+                free_list_remove(bp, index);
+                return (void *) bp;
+                // split remaining block here
+            }
+            bp = bp->next;
+        }
+
+
+        index++;
+    }
+
+    return NULL;
+
+
+
+
+    /*
     int i = get_index(asize);
     //debug print here
     int block_size;
@@ -204,7 +227,7 @@ void * find_fit(size_t asize)
                     // block fit found
                     printf("asize %d || ", asize);
                     printf("bsize %d\n", GET_SIZE(HDRP(bp)));
-                    bp = (void*) current; //current might have changed, update bp
+                    //bp = (void*) current; //current might have changed, update bp
                     free_list_remove(current, i);
                     return bp;
                 }
@@ -214,7 +237,7 @@ void * find_fit(size_t asize)
         i++;
     }
 
-    return NULL;
+    return NULL; */
 }
 
 /**********************************************************
