@@ -438,10 +438,9 @@ void free_list_remove(node* remove_block, int index){
  * Return nonzero if the heap is consistant.
  *********************************************************/
 int mm_check(void){
-//print out heap
 	void* heap_start = heap_listp;
 	
-	printf("START OF HEAP \n");
+	printf("=========START OF HEAP======== \n");
 	while(GET_SIZE(HDRP(heap_start)) != 0){
 		int curr_alloc = GET_ALLOC(HDRP(heap_start));
 		
@@ -460,9 +459,9 @@ int mm_check(void){
 			return 0;
 		}
 	}
-	printf("END OF HEAP \n");
+	printf("========END OF HEAP========= \n");
 	
-	printf("START OF SEG LIST\n");
+	printf("========START OF FREE LIST=========\n");
 	//print out free list
 	//and check to see if each block is free. 
 	for (int i = 0; i < 14; i++){
@@ -484,6 +483,6 @@ int mm_check(void){
 	}
 	
 	
-	printf("END OF SEG LIST\n");
+	printf("==========END OF FREE LIST==============\n");
   return 1;
 }
