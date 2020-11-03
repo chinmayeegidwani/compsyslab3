@@ -434,7 +434,7 @@ void free_list_remove(node* remove_block, int index){
     if(remove_block->prev == NULL && remove_block->next == NULL){
         // There is only one block in the list
         free_lists[index] = NULL;
-    } else if(free_lists[index] == remove_block){
+    } else if(remove_block->prev == NULL && remove_block -> next != NULL){
         // r_m is at the head of the list
         free_lists[index] = remove_block->next;
         free_lists[index]->prev = NULL;
