@@ -270,9 +270,9 @@ void mm_free(void *bp)
     PUT(HDRP(bp), PACK(size,0));
     PUT(FTRP(bp), PACK(size,0));
     bp = coalesce(bp);
-    mm_check()
+    mm_check();
     free_list_add(bp); //coalesce and add to free list
-    mm_check()
+    mm_check();
 }
 
 
