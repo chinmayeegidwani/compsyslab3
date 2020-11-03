@@ -307,6 +307,7 @@ void *mm_malloc(size_t size)
         //printf("fit found, now placing\n");
         place(bp, asize);
         //();
+        mm_check();
         return bp;
     }
 
