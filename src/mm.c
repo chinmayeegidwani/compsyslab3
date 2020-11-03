@@ -126,20 +126,31 @@ void *coalesce(void *bp)
     size_t prev_alloc = GET_ALLOC(FTRP(PREV_BLKP(bp)));
     size_t next_alloc = GET_ALLOC(HDRP(NEXT_BLKP(bp)));
     size_t size = GET_SIZE(HDRP(bp));
+    int index;
 
     if (prev_alloc && next_alloc) {       /* Case 1 */
         return bp;
     }
 
     else if (prev_alloc && !next_alloc) { /* Case 2 */
-        size += GET_SIZE(HDRP(NEXT_BLKP(bp)));
-        PUT(HDRP(bp), PACK(size, 0));
-        PUT(FTRP(bp), PACK(size, 0));
+    // merge with block ahead
+        size += GET_SIZE(HDRP(NEXT_BLKP(bp))); //size of next block
+        index = get_index(GET_SIZE(HDRP(NEXT_BLKP(bp)))); // index of next block
+        node* next_block = (node*) NEXT_BLKP(bp);
+        free_list_remove(next_block, index); // remove next block from free list
+
+        PUT(HDRP(bp), PACK(size, 0)); //set allocated bits in hdr and ftr
+        PUT(FTRP(bp), PACK(size, 0)); //update size in bp hdr and ftr
         return (bp);
     }
 
     else if (!prev_alloc && next_alloc) { /* Case 3 */
+    // merge with block behind
         size += GET_SIZE(HDRP(PREV_BLKP(bp)));
+        index = get_index(GET_SIZE(HDRP(PREV_BLKP(bp))));
+        node* next_block = (node*) PREV_BLKP(bp); //40
+        free_list_remove(next_block, index);
+
         PUT(FTRP(bp), PACK(size, 0));
         PUT(HDRP(PREV_BLKP(bp)), PACK(size, 0));
         return (PREV_BLKP(bp));
@@ -148,6 +159,13 @@ void *coalesce(void *bp)
     else {            /* Case 4 */
         size += GET_SIZE(HDRP(PREV_BLKP(bp)))  +
             GET_SIZE(FTRP(NEXT_BLKP(bp)))  ;
+        int prev_index = get_index(GET_SIZE(HDRP(PREV_BLKP(bp))));
+        int next_index = get_index(GET_SIZE(HDRP(NEXT_BLKP(bp))));
+        node* prev_block = (node*) PREV_BLKP(bp);
+        node* next_block = (node*) NEXT_BLKP(bp);
+        free_list_remove(prev_index, prev_block);
+        free_list_remove(next_index, next_block);
+
         PUT(HDRP(PREV_BLKP(bp)), PACK(size,0));
         PUT(FTRP(NEXT_BLKP(bp)), PACK(size,0));
         return (PREV_BLKP(bp));
