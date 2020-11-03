@@ -432,5 +432,52 @@ void free_list_remove(node* remove_block, int index){
  * Return nonzero if the heap is consistant.
  *********************************************************/
 int mm_check(void){
+//print out heap
+	void* heap_start = heap_listp;
+	
+	printf("START OF HEAP \n");
+	while(GET_SIZE(HDRP(heap_start)) != 0){
+		int curr_alloc = GET_ALLOC(HDRP(heap_start));
+		
+		printf("Address: 0x:%x tSize: %d Allocated: %d\n",heap_start, GET_SIZE(HDRP(heap_start)), curr_alloc);
+		
+		heap_start = NEXT_BLKP(heap_start);
+		
+		//check for any blocks that escape coalescing
+		if(curr_alloc == 0 && GET_ALLOC(HDRP(heap_start)) == 0){
+			printf("block escaped coalescing, but this could be fine if this was called before coalesce\n");
+		}
+		
+		//check for overlap between any blocks
+		if(FTRP(heap_start) > HDRP(NEXT_BLKP(heap_start)) ){
+			printf("THERE IS BLOCK OVERLAP at: %x\n",heap_start);
+			return 0;
+		}
+	}
+	printf("END OF HEAP \n");
+	
+	printf("START OF SEG LIST\n");
+	//print out free list
+	//and check to see if each block is free. 
+	for (int i = 0; i < 14; i++){
+		node* traverse = free_lists[i];
+		printf("hash value: %d\n",i);
+		while(traverse != NULL){
+			
+			int free_bit = GET_ALLOC(HDRP(traverse));
+			
+			printf("Address: 0x:%x tSize: %d Allocated: %d\n",traverse, GET_SIZE(HDRP(traverse)), free_bit);
+			
+			if(free_bit!=0){
+				printf("free bit isn't 0. This could be fine depending on where mm_check() is called.\n");
+			}
+			
+			traverse = traverse->next;
+		}
+		
+	}
+	
+	
+	printf("END OF SEG LIST\n");
   return 1;
 }
