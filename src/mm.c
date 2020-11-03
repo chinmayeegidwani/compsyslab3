@@ -162,8 +162,8 @@ void *coalesce(void *bp)
         int next_index = get_index(GET_SIZE(HDRP(NEXT_BLKP(bp))));
         node* prev_block = (node*) PREV_BLKP(bp);
         node* next_block = (node*) NEXT_BLKP(bp);
-        free_list_remove(prev_index, prev_block);
-        free_list_remove(next_index, next_block);
+        free_list_remove(prev_block, prev_index);
+        free_list_remove(next_block, next_index);
 
         PUT(HDRP(PREV_BLKP(bp)), PACK(size,0));
         PUT(FTRP(NEXT_BLKP(bp)), PACK(size,0));
@@ -390,6 +390,7 @@ void free_list_add(void *bp){
      * If it is not null, add bp to head of the appropriatefree list.
      */
     size_t payload_size = GET_SIZE(HDRP(bp)); //includes header + footer (?)
+    printf("payload: %d \n\n", payload_size);
     int index = 0;
 
     /* create new node for free list */
@@ -422,7 +423,9 @@ void free_list_remove(node* remove_block, int index){
     /* create remove node for free list */
     //node *remove_block = (node*)bp;
     //int index = get_index(GET_SIZE(HDRP(remove_block)));
-
+    mm_check();
+    printf("index in free: %d\n\n", index);
+    printf("remove block: %d\n\n", remove_block);
     if(remove_block->prev == NULL && remove_block->next == NULL){
         // There is only one block in the list
         free_lists[index] = NULL;
