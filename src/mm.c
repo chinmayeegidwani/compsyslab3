@@ -217,6 +217,8 @@ void * find_fit(size_t asize)
             }
             bp = bp->next;
         }
+        i++;
+
 
 
         index++;
