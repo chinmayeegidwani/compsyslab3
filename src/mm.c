@@ -332,7 +332,7 @@ void *mm_realloc(void *ptr, size_t size)
     //printf("Realloc size: %d\n", size);
     /* If size == 0 then this is just free, and we return NULL. */
     if(size == 0){
-      printf("free\n");
+      //printf("free\n");
       mm_free(ptr);
       return NULL;
     }
@@ -343,17 +343,38 @@ void *mm_realloc(void *ptr, size_t size)
     void *oldptr = ptr;
     void *newptr;
     size_t copySize;
+    // size of original ptr
+    int old_size = GET_SIZE(HDRP(ptr));
+    int asize;
 
+    /* Adjust block size to include overhead and alignment reqs. */
+    if (size <= DSIZE)
+        asize = 2 * DSIZE;
+    else
+        asize = DSIZE * ((size + (DSIZE) + (DSIZE-1))/ DSIZE);
+
+    if(asize == old_size){
+        // nothing changes
+        return ptr;
+    } else if(asize > old_size){
+        // size extended -- try coalescing
+    } else{
+        // allocate new block
+
+
+    }
+
+    /*
     newptr = mm_malloc(size);
     if (newptr == NULL)
       return NULL;
 
-    /* Copy the old data. */
+    /* Copy the old data. 
     copySize = GET_SIZE(HDRP(oldptr));
     if (size < copySize)
       copySize = size;
     memcpy(newptr, oldptr, copySize);
-    mm_free(oldptr);
+    mm_free(oldptr); */
     return newptr;
 }
 
