@@ -120,6 +120,7 @@ void free_list_add(void *bp);
  * - the previous block is available for coalescing
  * - both neighbours are available for coalescing
  **********************************************************/
+
 void *coalesce(void *bp)
 {
     size_t prev_alloc = GET_ALLOC(FTRP(PREV_BLKP(bp)));
@@ -324,7 +325,7 @@ void *mm_malloc(size_t size)
  *********************************************************/
 void *mm_realloc(void *ptr, size_t size)
 {
-    printf("Realloc size: %d\n", size);
+    //printf("Realloc size: %d\n", size);
     /* If size == 0 then this is just free, and we return NULL. */
     if(size == 0){
       printf("free\n");
@@ -396,7 +397,7 @@ void free_list_add(void *bp){
     } else {
         /* list not empty, insert new block at the head */
         free_lists[index] -> prev = new_free_block;
-        new_free_block -> next = free_lists[index];
+        free_lists[index] -> prev -> next = free_lists[index];
         free_lists[index] = new_free_block;
     }
 
@@ -415,6 +416,7 @@ void free_list_remove(node* remove_block, int index){
     //printf("index: %d\n\n", index);
     //printf("remove block: %d\n\n", remove_block);
     //mm_check();
+
 
     if(remove_block->prev == NULL && remove_block->next == NULL){
         // There is only one block in the list
