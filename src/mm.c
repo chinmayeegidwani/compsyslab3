@@ -78,9 +78,9 @@ void* heap_listp = NULL;
 
 
 /* Use doubly linked list for blocks */
-typedef struct linked_list{
-    struct linked_list* prev;
-    struct linked_list* next;
+typedef struct node{
+    struct node* prev;
+    struct node* next;
 } node;
 
 /* Contains array of pointers to the head of each seg. free list by size*/
@@ -208,40 +208,42 @@ void *extend_heap(size_t words)
  **********************************************************/
 void * find_fit(size_t asize)
 {
-    int split;
-    int index = get_index(asize);
+	int index = get_index(asize);
+    int bsize, remainder;
     while(index < NUM_LISTS){
-        node *bp = free_lists[index];
-        while(bp != NULL){
-            int bsize = GET_SIZE(HDRP(bp));
-            if(bsize >= asize){ //block fits
-                if(asize <= GET_SIZE(HDRP(bp))){
-                    // block cannot be split further
-                    free_list_remove(bp, index);
-                    return (void *) bp;
-                } else{
-                    // block can be split further
-                    free_list_remove(bp, index);
-                    size_t remainder = GET_SIZE(HDRP(bp)) - asize;
+    		node* bp = free_lists[index];
+            while (bp != NULL) {
+                bsize = GET_SIZE(HDRP(bp));
+                remainder = bsize - asize;
+                if (bsize >= asize) { //block fits
+                    if (remainder < 2*DSIZE) {
+                        // block cannot be split further
+                        free_list_remove(bp, index);
+                        return (void*) bp;
+                    }else{
+                        // block can be split further
+                        free_list_remove(bp, index);
+                        void* remainder_bp = (void*)bp + asize;
 
-                    void* remainder_bp = bp + asize;
-                    // updating bp to be asize big
-                    PUT(HDRP(bp), PACK(asize,0));
-                    PUT(FTRP(bp), PACK(asize,0));
-                    // updating remainder block, add to free list
-                    PUT(HDRP(remainder_bp), PACK(remainder,0));
-                    PUT(FTRP(remainder_bp), PACK(remainder,0));
-                    free_list_add(remainder_bp);
-                    return (void *) bp;
+                        // updating bp to be asize big
+                        PUT(HDRP(bp), PACK(asize,0));
+                        PUT(FTRP(bp), PACK(asize,0));
+                        // updating remainder block, add to free list
+                        PUT(HDRP(remainder_bp), PACK(remainder,0));
+                        PUT(FTRP(remainder_bp), PACK(remainder,0));
+
+                        free_list_add(remainder_bp);
+
+                        return (void*) bp;
                 }
+               
             }
-            bp = bp->next;
-        }
-        index++;
+             bp = bp->next;
+            }
+    	index++;
     }
-
+    
     return NULL;
-
 }
 
 /**********************************************************
