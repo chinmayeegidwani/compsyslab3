@@ -323,16 +323,10 @@ void *mm_malloc(size_t size)
 
 }
 
-/**********************************************************
- * mm_realloc
- * Implemented simply in terms of mm_malloc and mm_free
- *********************************************************/
 void *mm_realloc(void *ptr, size_t size)
 {
-    //printf("Realloc size: %d\n", size);
-    /* If size == 0 then this is just free, and we return NULL. */
+	/* If size == 0 then this is just free, and we return NULL. */
     if(size == 0){
-      //printf("free\n");
       mm_free(ptr);
       return NULL;
     }
@@ -341,41 +335,74 @@ void *mm_realloc(void *ptr, size_t size)
       return (mm_malloc(size));
 
     void *oldptr = ptr;
-    void *newptr;
+    void *anotherptr;
     size_t copySize;
-    // size of original ptr
-    int old_size = GET_SIZE(HDRP(ptr));
-    int asize;
+    size_t asize, bsize, remainder;
+    size_t old_size;
+
+    old_size = GET_SIZE(HDRP(oldptr));
+    copySize = old_size;
+    if (size < old_size)
+        copySize = size;
 
     /* Adjust block size to include overhead and alignment reqs. */
-    if (size <= DSIZE)
-        asize = 2 * DSIZE;
-    else
-        asize = DSIZE * ((size + (DSIZE) + (DSIZE-1))/ DSIZE);
+	if (size <= DSIZE)
+		asize = 2 * DSIZE;
+	else
+		asize = DSIZE * ((size + (DSIZE) + (DSIZE-1)) / DSIZE);
 
-    if(asize == old_size){
-        // nothing changes
-        return ptr;
-    } else if(asize > old_size){
-        // size extended -- try coalescing
-    } else{
-        // allocate new block
+    if (asize > old_size) { //expand
+
+        PUT(HDRP(ptr),PACK(old_size,0));
+        PUT(FTRP(ptr),PACK(old_size,0));
+        void* new_bp = coalesce(ptr);
+    	bsize = GET_SIZE(HDRP(new_bp));
+    	remainder = bsize - asize;
+    	if (bsize >= asize) { // if coalescing fits
+    		memmove(new_bp, ptr, old_size - DSIZE);
+
+        	PUT(HDRP(new_bp),PACK(bsize,1));
+        	PUT(FTRP(new_bp),PACK(bsize,1));
+
+            return new_bp;
+    		
+    	} else { //coalescing does not fit
+            // malloc over as default
+            anotherptr = mm_malloc(asize);
+            if (anotherptr == NULL)
+            return NULL;
+            memmove(anotherptr, oldptr, copySize);
+            mm_free(oldptr);
+            return anotherptr;
+        }
+    } else { //shrink
+    	remainder = old_size - asize;
+    	
+            if (remainder < 2*DSIZE) {
+                // block cannot be split further
+                //free_list_remove(bp, index);
+                return ptr;
+            }else{
+                // block can be split further
+                //free_list_remove(bp, index);
+                void* remainder_bp = ptr + asize;
+
+                // updating remainder block, add to free list
+                PUT(HDRP(remainder_bp), PACK(remainder,0));
+                PUT(FTRP(remainder_bp), PACK(remainder,0));
+
+                free_list_add(remainder_bp);
+
+                // updating bp to be asize big
+                PUT(HDRP(ptr), PACK(asize,1));
+                PUT(FTRP(ptr), PACK(asize,1));
 
 
+                return ptr;
+            }
     }
-
-    /*
-    newptr = mm_malloc(size);
-    if (newptr == NULL)
-      return NULL;
-
-    /* Copy the old data. 
-    copySize = GET_SIZE(HDRP(oldptr));
-    if (size < copySize)
-      copySize = size;
-    memcpy(newptr, oldptr, copySize);
-    mm_free(oldptr); */
-    return newptr;
+    
+    return NULL;
 }
 
 int get_index(int size){
