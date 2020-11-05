@@ -368,7 +368,6 @@ int get_index(int size){
 	return index;
 }
 
-*/
 /* Add block bp to the free list whose range matches
  * Add to the head of the free list
  * Return index in free_lists that the block was inserted into
