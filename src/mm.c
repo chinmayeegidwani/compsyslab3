@@ -69,10 +69,12 @@ team_t team = {
 #define NEXT_BLKP(bp) ((char *)(bp) + GET_SIZE(((char *)(bp) - WSIZE)))
 #define PREV_BLKP(bp) ((char *)(bp) - GET_SIZE(((char *)(bp) - DSIZE)))
 
+#define NUM_LISTS 15
+
 void* heap_listp = NULL;
 
 /* Specify size_t possible sizes for segregated free list */
-size_t free_list_sizes[14] = {32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144};
+//size_t free_list_sizes[14] = {32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144};
 
 
 /* Use doubly linked list for blocks */
@@ -82,7 +84,7 @@ typedef struct linked_list{
 } node;
 
 /* Contains array of pointers to the head of each seg. free list by size*/
-node* free_lists[14];
+node* free_lists[NUM_LISTS];
 
 
 /* Function declarations */
@@ -105,7 +107,7 @@ void free_list_add(void *bp);
      PUT(heap_listp + (3 * WSIZE), PACK(0, 1));    // epilogue header
      heap_listp += DSIZE;
 
-     for(int i=0; i<14; i++){
+     for(int i=0; i<NUM_LISTS; i++){
          free_lists[i] = NULL;
      }
 
@@ -208,7 +210,7 @@ void * find_fit(size_t asize)
 {
     int split;
     int index = get_index(asize);
-    while(index < 15){
+    while(index < NUM_LISTS){
         node *bp = free_lists[index];
         while(bp != NULL){
             int bsize = GET_SIZE(HDRP(bp));
@@ -353,21 +355,20 @@ void *mm_realloc(void *ptr, size_t size)
     return newptr;
 }
 
-
-
 int get_index(int size){
-    int index = 0;
-    size_t seg_size = 32; //smallest block available, anything bigger will also use block size 32
-    // in get index
-    while(size > seg_size && index < 15){
-        // in loop
-        seg_size *= 2; // keep multiplying by two until big enough block size found
-        index++;
-    }
-    /* TODO: what happens if bigger block size than index 14 is requested?*/
-    return index;
+	int index = 0;
+	size_t seg_size = 32;
+	
+	//keep shifting val to the left until it's bigger than size
+	while(seg_size < size && index < (NUM_LISTS -1)) {
+		seg_size *= 2;
+		index++;
+	}
+
+	return index;
 }
 
+*/
 /* Add block bp to the free list whose range matches
  * Add to the head of the free list
  * Return index in free_lists that the block was inserted into
