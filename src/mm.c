@@ -304,7 +304,7 @@ void *mm_malloc(size_t size)
     if(size < rounding){
         int rounded = 1;
         while(rounded < size){
-            rounded = rounded <<1;
+            rounded = rounded  << 1;
         }
         size = rounded;
     }
@@ -420,7 +420,7 @@ int get_index(int size){
 	
 	//keep shifting val to the left until it's bigger than size
 	while(seg_size < size && index < (NUM_LISTS -1)) {
-		seg_size *= 2;
+		seg_size = seg_size << 1;
 		index++;
 	}
 
