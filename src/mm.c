@@ -300,6 +300,15 @@ void *mm_malloc(size_t size)
     if (size == 0)
         return NULL;
 
+    size_t rounding =  512;
+    if(size < rounding){
+        int rounded = 1;
+        while(rounded < size){
+            rounded = rounded <<1;
+        }
+        size = rounded;
+    }
+
     /* Adjust block size to include overhead and alignment reqs. */
     if (size <= DSIZE)
         asize = 2 * DSIZE;
